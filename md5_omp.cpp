@@ -101,33 +101,38 @@ int main(int argc, char *argv[])
 	omp_set_num_threads(4);
 	double end_time;
 	double start_time;
+	int size;
 	
 	string dir = argv[1]; 
 	//string dir = string("/home/pywapi-0.3.8/examples/");
 	vector<string> files;
-	vector<file> md5;
 	string cmd = "md5sum ";
 	
-    #pragma omp parallel
-	{
-		#pragma omp master
-		{
 			getdir(dir,files);
-		}
 		
-		 //inicjalizacja licznika czasu
+		//timer initialisation
 		start_time = omp_get_wtime();
-		#pragma omp for schedule(auto)
-		for (int i = 0;i < files.size();i++) 
+		vector<file> md5;
+		#pragma omp parallel
+		{
+			vector<file> md5_private;
+			#pragma omp for nowait
+			for (unsigned int i = 0;i < files.size();i++) 
 			{
-					// << files[i] << endl;
-					cout << "MD5 for:  " + files[i] +": "+ split(exec(cmd+ files[i])) << endl;
-					md5.push_back({split(exec(cmd + files[i])),files[i]});
+					md5_private.push_back({split(exec(cmd+ files[i])),files[i]});
 			}
+			#pragma omp critical
+			md5.insert(md5.end(), md5_private.begin(), md5_private.end());
+		}
 		end_time = omp_get_wtime();
 		
-		#pragma omp master
-		{
+		//print results
+			size = md5.size();
+			for (unsigned int i = 0 ;i < md5.size(); i++)
+				{
+					cout << "MD5 for:  " + md5[i].name +": "+ md5[i].md5 << endl;
+				}
+				
 			for (unsigned int i = 0 ;i < md5.size(); i++)
 				{
 					for (unsigned int j = 0 ;j < md5.size(); j++)
@@ -139,8 +144,7 @@ int main(int argc, char *argv[])
 						}
 					}
 				}
-			}
-		}
+		cout << "Liczba znalezionych plikow: " << size << endl;
 		cout << "Czas wykonywania obliczen wynosi: " << end_time - start_time << endl;
 	return 0;
 }
