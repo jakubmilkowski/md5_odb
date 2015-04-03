@@ -11,5 +11,5 @@ To speed up whole process program uses [**OpenMP**](http://openmp.org/wp/openmp-
 `./md5_omp /home/pywapi-0.3.8/examples/ 4`
 
 ### Output example:
-
+![](/http://milkowsky.pl/scr.png)
 
