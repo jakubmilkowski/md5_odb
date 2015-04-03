@@ -98,7 +98,7 @@ string split(string input)
 
 int main(int argc, char *argv[])
 {
-	omp_set_num_threads(4);
+	omp_set_num_threads(strtod(argv[2], NULL));
 	double end_time;
 	double start_time;
 	int size;
