@@ -7,6 +7,7 @@
 #include <sstream>
 #include <stdio.h>
 #include <omp.h>
+#include <cstdlib>
 
 #define GREEN   "\033[32m"      /* Green */
 #define RESET   "\033[0m"
@@ -98,13 +99,22 @@ string split(string input)
 
 int main(int argc, char *argv[])
 {
-	omp_set_num_threads(strtod(argv[2], NULL));
 	double end_time;
 	double start_time;
 	int size;
+	string dir = "./";
 	
-	string dir = argv[1]; 
-	//string dir = string("/home/pywapi-0.3.8/examples/");
+	if(argv[2] != NULL){
+		omp_set_dynamic(0); 
+		omp_set_num_threads(strtod(argv[2], NULL));
+		//omp_set_num_threads(2);
+	}
+	
+	if(argv[1] != NULL)
+	{
+		dir = argv[1]; 
+	}
+	
 	vector<string> files;
 	string cmd = "md5sum ";
 	
@@ -119,7 +129,7 @@ int main(int argc, char *argv[])
 			#pragma omp for nowait
 			for (unsigned int i = 0;i < files.size();i++) 
 			{
-					md5_private.push_back({split(exec(cmd+ files[i])),files[i]});
+					md5_private.push_back({split(exec(cmd+"'"+files[i] +"'")),files[i]});
 			}
 			#pragma omp critical
 			md5.insert(md5.end(), md5_private.begin(), md5_private.end());
